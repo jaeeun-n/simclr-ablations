@@ -22,6 +22,7 @@ from __future__ import print_function
 from absl import flags
 
 import tensorflow.compat.v1 as tf
+import objective_util as objective_util
 
 from tensorflow.compiler.tf2xla.python import xla  # pylint: disable=g-direct-tensorflow-import
 
@@ -39,7 +40,8 @@ def add_contrastive_loss(hidden,
                          hidden_norm=True,
                          temperature=1.0,
                          tpu_context=None,
-                         weights=1.0):
+                         weights=1.0,
+                         similarity_measure):
   """Compute loss for model.
 
   Args:
@@ -76,12 +78,29 @@ def add_contrastive_loss(hidden,
     labels = tf.one_hot(tf.range(batch_size), batch_size * 2)
     masks = tf.one_hot(tf.range(batch_size), batch_size)
 
-  logits_aa = tf.matmul(hidden1, hidden1_large, transpose_b=True) / temperature
-  logits_aa = logits_aa - masks * LARGE_NUM
-  logits_bb = tf.matmul(hidden2, hidden2_large, transpose_b=True) / temperature
-  logits_bb = logits_bb - masks * LARGE_NUM
-  logits_ab = tf.matmul(hidden1, hidden2_large, transpose_b=True) / temperature
-  logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
+  if similarity_measure == 'cosine':
+    logits_aa = tf.matmul(hidden1, hidden1_large, transpose_b=True) / temperature
+    logits_aa = logits_aa - masks * LARGE_NUM
+    logits_bb = tf.matmul(hidden2, hidden2_large, transpose_b=True) / temperature
+    logits_bb = logits_bb - masks * LARGE_NUM
+    logits_ab = tf.matmul(hidden1, hidden2_large, transpose_b=True) / temperature
+    logits_ba = tf.matmul(hidden2, hidden1_large, transpose_b=True) / temperature
+  elif similarity_measure == 'euclidean':
+    logits_aa = objective_util.euclidean_dist(hidden1) / temperature
+    logits_aa = logits_aa - masks * LARGE_NUM
+    logits_bb = objective_util.euclidean_dist(hidden2) / temperature
+    logits_bb = logits_bb - masks * LARGE_NUM
+    logits_ab = objective_util.euclidean_dist(hidden1, hidden2) / temperature
+    logits_ba = objective_util.euclidean_dist(hidden2, hidden1) / temperature
+  elif similarity_measure == 'mahalanobis':
+    logits_aa = objective_util.mahalanobis_dist(hidden1) / temperature
+    logits_aa = logits_aa - masks * LARGE_NUM
+    logits_bb = objective_util.mahalanobis_dist(hidden2) / temperature
+    logits_bb = logits_bb - masks * LARGE_NUM
+    logits_ab = objective_util.mahalanobis_dist(hidden1, hidden2) / temperature
+    logits_ba = objective_util.mahalanobis_dist(hidden2, hidden1) / temperature
+  else:
+    raise ValueError('Unknown similarity_measure {}'.format(FLAGS.similarity_measure))
 
   loss_a = tf.losses.softmax_cross_entropy(
       labels, tf.concat([logits_ab, logits_aa], 1), weights=weights)

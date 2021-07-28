@@ -37,6 +37,10 @@ import tensorflow_hub as hub
 
 FLAGS = flags.FLAGS
 
+flags.DEFINE_enum(
+    'similarity_measure', 'cosine', ['cosine', 'euclidean', 'mahalanobis'],
+    'Similarity measure for loss calculation.'
+)
 
 flags.DEFINE_float(
     'learning_rate', 0.3,

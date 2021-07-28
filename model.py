@@ -75,7 +75,8 @@ def build_model_fn(model, num_classes, num_train_examples):
           hiddens_proj,
           hidden_norm=FLAGS.hidden_norm,
           temperature=FLAGS.temperature,
-          tpu_context=tpu_context if is_training else None)
+          tpu_context=tpu_context if is_training else None,
+          similarity_measure=FLAGS.similarity_measure)
       logits_sup = tf.zeros([params['batch_size'], num_classes])
     else:
       contrast_loss = tf.zeros([])
