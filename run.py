@@ -43,10 +43,6 @@ flags.DEFINE_enum(
 )
 
 flags.DEFINE_bool(
-    'crop_eval', True,
-    'Whether to center crop images for evaluation.')
-
-flags.DEFINE_bool(
     'use_color_distort', True,
     'Whether to apply color distortion to training images during data augmentation.')
 
