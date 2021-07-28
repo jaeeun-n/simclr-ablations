@@ -450,5 +450,6 @@ def main(argv):
 
 
 if __name__ == '__main__':
+  tf.set_random_seed(192837)
   tf.disable_eager_execution()  # Disable eager mode when running with TF2.
   app.run(main)
