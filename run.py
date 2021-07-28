@@ -42,6 +42,38 @@ flags.DEFINE_enum(
     'Similarity measure for loss calculation.'
 )
 
+flags.DEFINE_bool(
+    'crop_eval', True,
+    'Whether to center crop images for evaluation.')
+
+flags.DEFINE_bool(
+    'use_color_distort', True,
+    'Whether to apply color distortion to training images during data augmentation.')
+
+flags.DEFINE_bool(
+    'use_crop', True,
+    'Whether training images should be cropped during data augmentation.')
+
+flags.DEFINE_bool(
+    'use_flip', True,
+    'Whether training images should be left-right-flipped during data augmentation.')
+
+flags.DEFINE_bool(
+    'use_salt_and_pepper', False,
+    'Whether to add salt-and-pepper-noise to training images during data augmentation.')
+
+flags.DEFINE_bool(
+    'use_brightness', False,
+    'Whether brightness of training images should be changed during data augmentation.')
+
+flags.DEFINE_bool(
+    'use_random_invert', False,
+    'Whether training image colors should be randomly inverted during data augmentation.')
+
+flags.DEFINE_bool(
+    'use_standardize', False,
+    'Whether training images should be standardized during data augmentation.')
+
 flags.DEFINE_float(
     'learning_rate', 0.3,
     'Initial learning rate per batch size of 256.')

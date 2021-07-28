@@ -28,6 +28,41 @@ FLAGS = flags.FLAGS
 
 CROP_PROPORTION = 0.875  # Standard for ImageNet.
 
+def salt_and_pepper(image, salt_proportion=0.5, amount=0.05):
+  height = int(tf.shape(image)[0])
+  width = int(tf.shape(image)[1])
+
+  prob_salt = amount * salt_proportion
+  prob_pepper = amount * (1.0 - salt_proportion)
+
+  # add pepper noise
+  binomial_samples = tf.random.stateless_binomial(
+    shape=[height, width], seed=[123, 456], counts=tf.ones([width]), probs=1-prob_salt, output_dtype=float)
+  change = tf.stack([binomial_samples, binomial_samples, binomial_samples], axis=2)
+  image = image * change
+
+  # add salt noise
+  binomial_samples = tf.random.stateless_binomial(
+    shape=[height, width], seed=[456, 789], counts=tf.ones([width]), probs=1-prob_pepper, output_dtype=float)
+  mask = tf.stack([binomial_samples, binomial_samples, binomial_samples], axis=2)
+  change = tf.ones(tf.shape(image)) - mask
+  image = image * mask + change
+
+  return image
+
+
+def random_invert(image, p=0.5):
+  if tf.random.uniform([]) < p:
+    ones = tf.ones(tf.shape(image))
+    image = ones - image
+  return image
+
+
+def random_standardize(image, p=0.5):
+  if tf.random.uniform([]) < p:
+    image = tf.image.per_image_standardization(image)
+  return image
+
 
 def random_apply(func, p, x):
   """Randomly apply function func to x with probability p."""
@@ -413,8 +448,7 @@ def batch_random_blur(images_list, height, width, blur_probability=0.5):
   return new_images_list
 
 
-def preprocess_for_train(image, height, width,
-                         color_distort=True, crop=True, flip=True):
+def preprocess_for_train(image, height, width):
   """Preprocesses the given image for training.
 
   Args:
@@ -428,14 +462,25 @@ def preprocess_for_train(image, height, width,
   Returns:
     A preprocessed image `Tensor`.
   """
-  if crop:
+  if FLAGS.use_crop:
     image = random_crop_with_resize(image, height, width)
-  if flip:
+  if FLAGS.use_flip:
     image = tf.image.random_flip_left_right(image)
-  if color_distort:
+  if FLAGS.use_color_distort:
     image = random_color_jitter(image)
+  if FLAGS.use_brightness:
+    image = tf.image.random_brightness(image, max_delta=0.7)
+  if FLAGS.use_standardize:
+    image = random_standardize(image)
+
   image = tf.reshape(image, [height, width, 3])
   image = tf.clip_by_value(image, 0., 1.)
+
+  if FLAGS.use_salt_and_pepper:
+    image = salt_and_pepper(image)
+  if FLAGS.use_random_invert:
+    image = random_invert(image)
+
   return image
 
 
@@ -459,13 +504,12 @@ def preprocess_for_eval(image, height, width, crop=True):
 
 
 def preprocess_image(image, height, width, is_training=False,
-                     color_distort=True, test_crop=True):
+                     test_crop=True):
   """Preprocesses the given image.
 
   Args:
     image: `Tensor` representing an image of arbitrary size.
     height: Height of output image.
-    width: Width of output image.
     is_training: `bool` for whether the preprocessing is for training.
     color_distort: whether to apply the color distortion.
     test_crop: whether or not to extract a central crop of the images
@@ -476,6 +520,6 @@ def preprocess_image(image, height, width, is_training=False,
   """
   image = tf.image.convert_image_dtype(image, dtype=tf.float32)
   if is_training:
-    return preprocess_for_train(image, height, width, color_distort)
+    return preprocess_for_train(image, height, width)
   else:
     return preprocess_for_eval(image, height, width, test_crop)

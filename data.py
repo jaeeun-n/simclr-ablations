@@ -161,5 +161,4 @@ def get_preprocess_fn(is_training, is_pretrain):
       height=FLAGS.image_size,
       width=FLAGS.image_size,
       is_training=is_training,
-      color_distort=is_pretrain,
       test_crop=test_crop)
