@@ -41,7 +41,7 @@ def add_contrastive_loss(hidden,
                          temperature=1.0,
                          tpu_context=None,
                          weights=1.0,
-                         similarity_measure):
+                         similarity_measure='cosine'):
   """Compute loss for model.
 
   Args:
