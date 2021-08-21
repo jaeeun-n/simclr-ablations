@@ -42,7 +42,7 @@ def add_contrastive_loss(hidden,
                          tpu_context=None,
                          weights=1.0,
                          similarity_measure='cosine'):
-  """Compute loss for model.
+  """Compute loss for model. (changes by author: jaeeun-n)
 
   Args:
     hidden: hidden vector (`Tensor`) of shape (bsz, dim).
@@ -50,6 +50,7 @@ def add_contrastive_loss(hidden,
     temperature: a `floating` number for temperature scaling.
     tpu_context: context information for tpu.
     weights: a weighting number or vector.
+    similarity_measure: metric for computing the similarity matrix.
 
   Returns:
     A loss scalar.

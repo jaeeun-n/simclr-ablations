@@ -39,8 +39,7 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_enum(
     'similarity_measure', 'cosine', ['cosine', 'euclidean', 'mahalanobis'],
-    'Similarity measure for loss calculation.'
-)
+    'Similarity measure for contrastive loss calculation.')
 
 flags.DEFINE_bool(
     'use_color_distort', True,

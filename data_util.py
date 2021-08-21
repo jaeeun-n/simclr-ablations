@@ -29,19 +29,29 @@ FLAGS = flags.FLAGS
 CROP_PROPORTION = 0.875  # Standard for ImageNet.
 
 def salt_and_pepper(image, salt_proportion=0.5, amount=0.05):
+  """Randomly changes pixels to be white or black. (author: jaeeun-n)
+
+  Args:
+    image: The input image tensor.
+    salt_proportion: Proportion of salt pixels in relation to pepper pixels.
+    amount: Proportion of pixels to be changed.
+
+  Returns:
+    The image tensor with noise.
+  """
   height = int(tf.shape(image)[0])
   width = int(tf.shape(image)[1])
 
   prob_salt = amount * salt_proportion
   prob_pepper = amount * (1.0 - salt_proportion)
 
-  # add pepper noise
+  # add salt noise
   binomial_samples = tf.random.stateless_binomial(
     shape=[height, width], seed=[123, 456], counts=tf.ones([width]), probs=1-prob_salt, output_dtype=float)
   change = tf.stack([binomial_samples, binomial_samples, binomial_samples], axis=2)
   image = image * change
 
-  # add salt noise
+  # add pepper noise
   binomial_samples = tf.random.stateless_binomial(
     shape=[height, width], seed=[456, 789], counts=tf.ones([width]), probs=1-prob_pepper, output_dtype=float)
   mask = tf.stack([binomial_samples, binomial_samples, binomial_samples], axis=2)
@@ -52,6 +62,15 @@ def salt_and_pepper(image, salt_proportion=0.5, amount=0.05):
 
 
 def random_invert(image, p=0.5):
+  """Randomly invert pixels. Assume that values in tensor range from 0 to 1. (author: jaeeun-n)
+
+  Args:
+    image: The input image tensor.
+    p: Probability of applying the inversion to the input image.
+
+  Returns:
+    Either the input image or the inverted image.
+  """
   if tf.random.uniform([]) < p:
     ones = tf.ones(tf.shape(image))
     image = ones - image
@@ -59,6 +78,15 @@ def random_invert(image, p=0.5):
 
 
 def random_standardize(image, p=0.5):
+  """Randomly apply per-image standardization. (author: jaeeun-n)
+
+  Args:
+    image: The input image tensor.
+    p: Probability of applying the standardization to the input image.
+
+  Returns:
+    Either the input image or the standardized image.
+  """
   if tf.random.uniform([]) < p:
     image = tf.image.per_image_standardization(image)
   return image
@@ -449,15 +477,12 @@ def batch_random_blur(images_list, height, width, blur_probability=0.5):
 
 
 def preprocess_for_train(image, height, width):
-  """Preprocesses the given image for training.
+  """Preprocesses the given image for training. (changes by author: jaeeun-n)
 
   Args:
     image: `Tensor` representing an image of arbitrary size.
     height: Height of output image.
     width: Width of output image.
-    color_distort: Whether to apply the color distortion.
-    crop: Whether to crop the image.
-    flip: Whether or not to flip left and right of an image.
 
   Returns:
     A preprocessed image `Tensor`.
