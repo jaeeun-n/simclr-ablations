@@ -77,7 +77,7 @@ You can check the results using tensorboard, such as
 python -m tensorboard.main --logdir=/tmp/simclr_test
 ```
 
-As a reference, the above runs on CIFAR-10 using the original setting should give you around 71% accuracy.
+As a reference, the above runs on CIFAR-10 using the original settings should give you around 71% accuracy.
 
 
 ## Disclaimer
