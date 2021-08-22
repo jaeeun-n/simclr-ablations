@@ -6,7 +6,7 @@ import tensorflow_probability as tfp
 
 def euclidean_dist(A, B=None):
     """
-    Computes pairwise squared euclidean distances between each element of A and each element of B
+    Computes pairwise squared euclidean distances between each row of A and each row of B
     and converts to similarities.
     The Code for computing the pairwise distances is taken from https://fairyonice.github.io/mahalanobis-tf2.html.
 
@@ -31,7 +31,7 @@ def euclidean_dist(A, B=None):
 
 def mahalanobis_dist(A, B=None):
     """
-        Computes pairwise squared mahalanobis distances between each element of A and each element of B
+        Computes pairwise squared mahalanobis distances between each row of A and each row of B
         and converts to similarities.
         The Code for computing the pairwise distances is taken from https://fairyonice.github.io/mahalanobis-tf2.html.
 
@@ -45,7 +45,7 @@ def mahalanobis_dist(A, B=None):
     if B is None:
         B = A
         S = tfp.stats.covariance(A)
-    else:  # if two matrices are given, assume that columns in A and B are from the same distribution
+    else:  # if two tensors are given, assume that columns in A and B are from the same distribution
         AB = tf.concat([A, B], 0)
         S = tfp.stats.covariance(AB)
 
