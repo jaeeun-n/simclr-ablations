@@ -6,7 +6,7 @@ It allows conducting ablation studies with respect to different similarity metri
 
 ## Enviroment setup
 
-All my models were trained on a *single* GPU using Google Colab.
+All my models were trained on a *single* GPU using Google Colab Pro.
 
 The code is compatible with both TensorFlow v1 and v2. See requirements.txt for all prerequisites, and you can also install them using the following command.
 
@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 ## Pretraining
 
-To pretrain the original model on CIFAR-10, try the following command:
+To pretrain the original SimCLR on CIFAR-10, try the following command:
 
 ```
 python run.py --train_mode=pretrain \
